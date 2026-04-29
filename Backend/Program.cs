@@ -152,7 +152,15 @@ app.MapFallbackToFile("index.html");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch
+    {
+        // Fallback for local SQLite dev: just ensure tables exist
+        db.Database.EnsureCreated();
+    }
 }
 
 app.Run();
