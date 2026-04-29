@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://team-task-manager-production-4e6c.up.railway.app'
+  apiUrl: ''  // Empty string = same origin, since frontend and backend share one URL
 };

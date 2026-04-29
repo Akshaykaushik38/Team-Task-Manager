@@ -131,16 +131,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+// No HTTPS redirection on Railway (Railway handles SSL termination)
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+
+// Serve Angular static files from wwwroot
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Apply Migrations at startup (for convenience in dev)
+// SPA fallback: all non-API routes return index.html (for Angular routing)
+app.MapFallbackToFile("index.html");
+
+// Apply Migrations at startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
