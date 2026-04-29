@@ -77,40 +77,7 @@ The application is pre-configured to use **SQLite** for local development, so no
 
 ---
 
-## 🌐 Deployment Instructions
 
-### 1. Backend Deployment (Railway / Render)
-1. **Repository Setup**: Push your code to a GitHub repository.
-2. **Railway / Render**: Create a new Web Service and link your repository.
-3. **Configuration**:
-   - Build Command: `dotnet publish -c Release -o out`
-   - Start Command: `dotnet out/TaskManager.API.dll`
-4. **Environment Variables**:
-   Add the following variables in the platform's dashboard:
-   - `ConnectionStrings__DefaultConnection`: Set to your production PostgreSQL connection string.
-   - `JwtSettings__Key`: Generate a strong secret key (e.g., using `openssl rand -base64 32`).
-   - `JwtSettings__Issuer`: Your domain name.
-   - `JwtSettings__Audience`: Your frontend domain.
-
-### 2. Database Deployment
-- **Railway PostgreSQL** or **Supabase** are great options.
-- Create a new PostgreSQL database on the platform.
-- Copy the connection string and set it in the backend's environment variables.
-
-### 3. Frontend Deployment (Vercel / Netlify)
-1. **Repository**: Ensure your `Frontend` folder is pushed.
-2. **Platform Setup**: Import the repository into Vercel or Netlify.
-   - **Framework Preset**: Angular
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist/frontend/browser` (or `dist/task-manager-frontend/browser` depending on angular version).
-3. **Environment**:
-   Update `src/environments/environment.prod.ts` to point to your live backend API URL before building, or use environment variables during the build process to replace `environment.ts`.
-4. **Routing Fixes (Netlify/Vercel)**:
-   Ensure you add redirects so Angular routing works on page refresh. 
-   - *Netlify*: Create a `_redirects` file in `src/` with: `/* /index.html 200`
-   - *Vercel*: Create a `vercel.json` with rewrites pointing to `index.html`.
-
----
 
 ## 📖 Application Architecture (Clean Architecture)
 
