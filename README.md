@@ -5,7 +5,7 @@ A full-stack, production-ready web application for team task management. Built w
 ---
 
 ## 🌐 Live Demo & API
-- **Frontend (Vercel):** [https://team-task-manager-green.vercel.app](https://team-task-manager-green.vercel.app)
+- **Frontend (Railway):** [https://abundant-enthusiasm-production-b23b.up.railway.app](https://abundant-enthusiasm-production-b23b.up.railway.app)
 - **Backend API (Railway):** [https://team-task-manager-production-4e6c.up.railway.app](https://team-task-manager-production-4e6c.up.railway.app)
 
 ---
