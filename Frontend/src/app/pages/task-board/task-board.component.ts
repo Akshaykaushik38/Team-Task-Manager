@@ -77,7 +77,7 @@ import { AuthService } from '../../services/auth.service';
                   <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{{ task.description }}</p>
                 </div>
                 <!-- Quick action -->
-                <button *ngIf="authService.isAdmin()" (click)="updateStatus(task, 'InProgress')"
+                <button (click)="updateStatus(task, 'InProgress')"
                         class="opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0 h-7 w-7 rounded-lg flex items-center justify-center hover:bg-white/10"
                         style="color:#60a5fa;" title="Start Task">
                   <i class="fa-solid fa-circle-play text-sm"></i>
@@ -151,7 +151,7 @@ import { AuthService } from '../../services/auth.service';
               </div>
 
               <!-- Action buttons on hover -->
-              <div *ngIf="authService.isAdmin()"
+              <div
                    class="mt-3 pl-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                 <button (click)="updateStatus(task, 'Todo')"
                         class="flex-1 text-xs font-semibold py-1.5 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"

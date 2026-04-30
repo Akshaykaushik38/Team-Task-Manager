@@ -177,7 +177,10 @@ export class SignupComponent {
     this.loading = true;
     this.error = '';
     this.authService.signup(this.signupForm.value).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      },
       error: err => {
         this.error = err.error?.message || 'Signup failed. Please try again.';
         this.loading = false;
