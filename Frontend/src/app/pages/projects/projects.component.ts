@@ -10,105 +10,173 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
-    <div class="py-6">
-      <div class="animate-fade-in-up">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+    <div class="py-8 animate-fade-in-up">
+
+      <!-- ─── Header ─── -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
         <div>
-          <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Your Projects</h1>
-          <p class="mt-2 text-slate-500 text-lg">Manage teams and task boards</p>
+          <div class="flex items-center gap-3 mb-2">
+            <div class="h-8 w-1 rounded-full" style="background: linear-gradient(180deg, #8b5cf6, #6366f1);"></div>
+            <p class="text-xs font-semibold text-purple-400 uppercase tracking-[0.2em]">Workspace</p>
+          </div>
+          <h1 class="text-4xl sm:text-5xl font-bold text-white tracking-tight">Your Projects</h1>
+          <p class="mt-3 text-slate-400 text-lg">{{ projects.length }} project{{ projects.length !== 1 ? 's' : '' }} in your workspace</p>
         </div>
-        <button *ngIf="authService.isAdmin()" (click)="showCreateModal = true" class="group relative inline-flex items-center justify-center px-6 py-3 font-bold text-white transition-all duration-200 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-          <i class="fa-solid fa-plus mr-2 group-hover:rotate-90 transition-transform duration-300"></i> New Project
+
+        <button *ngIf="authService.isAdmin()" (click)="showCreateModal = true" id="create-project-btn"
+                class="btn-primary flex-shrink-0 group gap-2">
+          <div class="h-5 w-5 rounded-md flex items-center justify-center"
+               style="background:rgba(255,255,255,0.15);">
+            <i class="fa-solid fa-plus text-xs group-hover:rotate-90 transition-transform duration-300"></i>
+          </div>
+          New Project
         </button>
       </div>
 
-      <!-- Project List -->
-      <div *ngIf="projects.length === 0 && !loading" class="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-100 border-dashed">
-        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fa-regular fa-folder-open text-3xl text-indigo-400"></i>
+      <!-- ─── Loading Skeletons ─── -->
+      <div *ngIf="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let i of [1,2,3]" class="stat-card rounded-2xl h-56 shimmer"></div>
+      </div>
+
+      <!-- ─── Empty State ─── -->
+      <div *ngIf="projects.length === 0 && !loading"
+           class="glass-card rounded-2xl py-20 text-center animate-fade-in">
+        <div class="inline-flex h-20 w-20 rounded-2xl items-center justify-center mb-6 animate-float"
+             style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1)); border:1px solid rgba(99,102,241,0.2);">
+          <i class="fa-regular fa-folder-open text-4xl text-indigo-400"></i>
         </div>
-        <h3 class="text-xl font-bold text-slate-700">No projects found</h3>
-        <p class="text-slate-500 mt-2 max-w-sm mx-auto">Get started by creating a new project or waiting for an invitation.</p>
-        <button *ngIf="authService.isAdmin()" (click)="showCreateModal = true" class="mt-6 text-indigo-600 font-medium hover:text-indigo-800">
-          Create your first project &rarr;
+        <h3 class="text-xl font-bold text-white mb-2">No projects yet</h3>
+        <p class="text-slate-400 text-sm max-w-xs mx-auto mb-6">
+          Get started by creating your first project and inviting your team.
+        </p>
+        <button *ngIf="authService.isAdmin()" (click)="showCreateModal = true"
+                class="btn-primary inline-flex gap-2">
+          <i class="fa-solid fa-plus text-sm"></i>
+          Create First Project
         </button>
       </div>
 
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div *ngFor="let project of projects" class="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col transform hover:-translate-y-1 relative">
-          <!-- Decorative Top Accent -->
-          <div class="h-2 w-full bg-gradient-to-r from-indigo-500 to-purple-500 absolute top-0 left-0"></div>
-          
-          <div class="p-6 flex-1 pt-8">
-            <div class="flex justify-between items-start mb-4">
-              <h3 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ project.name }}</h3>
-              <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-1 rounded-md border border-indigo-100">
+      <!-- ─── Project Grid ─── -->
+      <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let project of projects; let i = index"
+             class="group glass-card rounded-2xl overflow-hidden flex flex-col relative cursor-pointer animate-fade-in-up"
+             [style]="'animation-delay:' + (i * 0.08) + 's;'">
+
+          <!-- Top gradient accent -->
+          <div class="h-1 w-full flex-shrink-0"
+               [style]="'background: linear-gradient(90deg, ' + getProjectGradient(i) + ');'"></div>
+
+          <!-- Hover glow overlay -->
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+               [style]="'background: radial-gradient(ellipse at top left, ' + getProjectGlowColor(i) + ' 0%, transparent 60%);'"></div>
+
+          <div class="relative p-6 flex flex-col flex-1">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-4">
+              <!-- Project icon -->
+              <div class="h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                   [style]="'background: linear-gradient(135deg, ' + getProjectGradient(i) + '); box-shadow: 0 4px 15px ' + getProjectShadow(i) + ';'">
+                <i class="fa-solid fa-folder text-white text-base"></i>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg"
+                    style="background:rgba(255,255,255,0.05); color:#64748b; border:1px solid rgba(255,255,255,0.08);">
                 #{{ project.id }}
               </span>
             </div>
-            
-            <p class="text-sm text-slate-500 mb-6 flex items-center">
-              <i class="fa-regular fa-calendar-plus mr-2 opacity-70"></i> Created on {{ project.createdAt | date:'mediumDate' }}
-              <br/>
-              <i class="fa-solid fa-user-pen mr-2 opacity-70 mt-1"></i> by {{ project.createdByName }}
-            </p>
-            
-            <div class="flex items-center gap-4 text-sm font-medium text-slate-600">
-              <div class="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg">
-                <i class="fa-solid fa-users text-indigo-400 mr-2"></i> {{ project.memberCount }}
+
+            <!-- Name -->
+            <h3 class="text-lg font-bold text-white mb-1 leading-tight group-hover:text-indigo-300 transition-colors duration-200">
+              {{ project.name }}
+            </h3>
+
+            <!-- Meta -->
+            <div class="flex flex-col gap-1.5 mb-5 text-xs text-slate-500">
+              <span class="flex items-center gap-2">
+                <i class="fa-regular fa-calendar text-slate-600 w-3"></i>
+                Created {{ project.createdAt | date:'MMM d, y' }}
+              </span>
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-user-pen text-slate-600 w-3"></i>
+                by <span class="text-slate-400 font-medium">{{ project.createdByName }}</span>
+              </span>
+            </div>
+
+            <!-- Stats chips -->
+            <div class="flex items-center gap-2 mt-auto mb-5">
+              <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                   style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); color:#818cf8;">
+                <i class="fa-solid fa-users text-xs"></i>
+                {{ project.memberCount }} member{{ project.memberCount !== 1 ? 's' : '' }}
               </div>
-              <div class="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg">
-                <i class="fa-solid fa-list-check text-purple-400 mr-2"></i> {{ project.taskCount }}
+              <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                   style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.2); color:#c084fc;">
+                <i class="fa-solid fa-list-check text-xs"></i>
+                {{ project.taskCount }} task{{ project.taskCount !== 1 ? 's' : '' }}
               </div>
             </div>
-          </div>
-          
-          <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 group-hover:bg-indigo-50/30 transition-colors">
-            <a [routerLink]="['/projects', project.id, 'tasks']" class="flex justify-between items-center text-indigo-600 hover:text-indigo-800 font-bold text-sm w-full">
-              Open Board <i class="fa-solid fa-arrow-right-long transform group-hover:translate-x-1 transition-transform"></i>
+
+            <!-- Footer CTA -->
+            <a [routerLink]="['/projects', project.id, 'tasks']"
+               class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group/btn"
+               style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.15); color:#818cf8;">
+              <span>Open Board</span>
+              <i class="fa-solid fa-arrow-right text-xs group-hover/btn:translate-x-1.5 transition-transform duration-200"></i>
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
-        <i class="fa-solid fa-circle-notch fa-spin text-5xl text-indigo-500 mb-4"></i>
-        <p class="text-slate-500 font-medium animate-pulse">Loading projects...</p>
-      </div>
-      </div> <!-- End of animated container -->
+      <!-- ─── Create Project Modal ─── -->
+      <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-md" (click)="showCreateModal = false"></div>
 
-      <!-- Create Project Modal -->
-      <div *ngIf="showCreateModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Background backdrop -->
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="showCreateModal = false"></div>
+        <!-- Modal -->
+        <div class="relative w-full max-w-md animate-fade-in-up z-10">
+          <!-- Glow -->
+          <div class="absolute -inset-0.5 rounded-2xl opacity-50"
+               style="background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.3)); filter:blur(8px);"></div>
 
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <!-- Modal panel -->
-            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100">
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                  <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <i class="fa-solid fa-folder-plus text-indigo-600"></i>
-                  </div>
-                  <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-title">Create New Project</h3>
-                    <div class="mt-4">
-                      <label class="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
-                      <input type="text" [(ngModel)]="newProjectName" class="block w-full px-4 py-3 border border-slate-300 bg-slate-50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors" placeholder="e.g. Website Redesign">
-                    </div>
-                  </div>
+          <div class="relative glass-modal rounded-2xl p-7">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl flex items-center justify-center"
+                     style="background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow:0 0 20px rgba(99,102,241,0.4);">
+                  <i class="fa-solid fa-folder-plus text-white text-sm"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">New Project</h3>
+                  <p class="text-xs text-slate-500">Add a project to your workspace</p>
                 </div>
               </div>
-              <div class="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-slate-100">
-                <button type="button" (click)="createProject()" [disabled]="!newProjectName" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2.5 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  Create Project
-                </button>
-                <button type="button" (click)="showCreateModal = false" class="mt-3 w-full inline-flex justify-center rounded-lg border border-slate-300 shadow-sm px-6 py-2.5 bg-white text-base font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                  Cancel
-                </button>
-              </div>
+              <button (click)="showCreateModal = false"
+                      class="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-all duration-200">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+
+            <!-- Input -->
+            <div class="space-y-1.5 mb-6">
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Project Name</label>
+              <input type="text" [(ngModel)]="newProjectName" id="new-project-name"
+                     placeholder="e.g. Website Redesign, Mobile App..."
+                     class="input-dark text-sm"
+                     (keyup.enter)="createProject()">
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3">
+              <button (click)="showCreateModal = false"
+                      class="btn-secondary flex-1">
+                Cancel
+              </button>
+              <button (click)="createProject()" id="confirm-create-project"
+                      [disabled]="!newProjectName.trim()"
+                      class="btn-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+                <i class="fa-solid fa-plus mr-2 text-sm"></i>
+                Create Project
+              </button>
             </div>
           </div>
         </div>
@@ -123,34 +191,50 @@ export class ProjectsComponent implements OnInit {
   showCreateModal = false;
   newProjectName = '';
 
-  constructor(
-    private projectService: ProjectService,
-    public authService: AuthService
-  ) {}
+  private gradients = [
+    ['#6366f1', '#8b5cf6'],
+    ['#8b5cf6', '#ec4899'],
+    ['#06b6d4', '#6366f1'],
+    ['#10b981', '#06b6d4'],
+    ['#f59e0b', '#ef4444'],
+    ['#ec4899', '#8b5cf6'],
+  ];
 
-  ngOnInit() {
-    this.loadProjects();
-  }
+  constructor(private projectService: ProjectService, public authService: AuthService) {}
+
+  ngOnInit() { this.loadProjects(); }
 
   loadProjects() {
     this.loading = true;
     this.projectService.getProjects().subscribe({
-      next: (data) => {
-        this.projects = data;
-        this.loading = false;
-      },
+      next: (data) => { this.projects = data; this.loading = false; },
       error: () => this.loading = false
     });
   }
 
   createProject() {
-    if (!this.newProjectName) return;
-    this.projectService.createProject(this.newProjectName).subscribe({
+    if (!this.newProjectName.trim()) return;
+    this.projectService.createProject(this.newProjectName.trim()).subscribe({
       next: (project) => {
         this.projects.push(project);
         this.showCreateModal = false;
         this.newProjectName = '';
       }
     });
+  }
+
+  getProjectGradient(i: number): string {
+    const g = this.gradients[i % this.gradients.length];
+    return `${g[0]}, ${g[1]}`;
+  }
+
+  getProjectGlowColor(i: number): string {
+    const g = this.gradients[i % this.gradients.length];
+    return g[0] + '18';
+  }
+
+  getProjectShadow(i: number): string {
+    const g = this.gradients[i % this.gradients.length];
+    return g[0] + '40';
   }
 }
